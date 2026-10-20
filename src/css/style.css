@@ -1,0 +1,48 @@
+/* Estructura principal para mantener el Footer siempre al final */
+body, html {
+  height: 100%;
+  margin: 0;
+  background-color: #f8f9fa;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.hero-tienda67 {
+  background: linear-gradient(135deg, #1e2125 0%, #343a40 100%);
+  color: #ffffff;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.card {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  border: none;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.12) !important;
+}
+
+.card-img-top {
+  height: 220px;
+  object-fit: cover;
+  border-bottom: 1px solid #eee;
+}
+
+
+@media (max-width: 576px) {
+  .hero-tienda67 {
+    text-align: center;
+    padding: 1.5rem !important;
+  }
+
+  .card-img-top {
+    height: 180px;
+  }
+}
