@@ -24,7 +24,9 @@ describe("Suite de Pruebas Unitarias - Tienda67 (10 Pruebas)", () => {
 
   it("1. Debe renderizar correctamente el nombre y precio del producto recibido por props en ProductCard", () => {
     const { getByTestId } = render(
-      <ProductCard producto={productoMock} onAgregar={() => {}} />
+      <MemoryRouter>
+        <ProductCard producto={productoMock} onAgregar={() => {}} />
+      </MemoryRouter>
     );
     expect(getByTestId("product-title").textContent).toBe("Audífonos In-Ear Pro");
     expect(getByTestId("product-price").textContent).toContain("19.990");
@@ -33,7 +35,9 @@ describe("Suite de Pruebas Unitarias - Tienda67 (10 Pruebas)", () => {
   it("2. Debe ejecutar la función callback (Mock Spy) con el producto correcto al hacer clic en 'Agregar al carrito'", () => {
     const onAgregarSpy = jasmine.createSpy("onAgregarSpy");
     const { getByTestId } = render(
-      <ProductCard producto={productoMock} onAgregar={onAgregarSpy} />
+      <MemoryRouter>
+        <ProductCard producto={productoMock} onAgregar={onAgregarSpy} />
+      </MemoryRouter>
     );
 
     fireEvent.click(getByTestId("btn-add-1"));
@@ -65,7 +69,9 @@ describe("Suite de Pruebas Unitarias - Tienda67 (10 Pruebas)", () => {
     ];
 
     const { getByTestId, queryByText } = render(
-      <Productos productos={listaMock} onAgregarAlCarrito={() => {}} />
+      <MemoryRouter>
+        <Productos productos={listaMock} onAgregarAlCarrito={() => {}} />
+      </MemoryRouter>
     );
 
     const inputBusqueda = getByTestId("search-input");
@@ -156,18 +162,32 @@ describe("Suite de Pruebas Unitarias - Tienda67 (10 Pruebas)", () => {
     fireEvent.change(getByTestId("input-nombre"), {
       target: { value: "Arturo Cabello" }
     });
+    fireEvent.change(getByTestId("input-run"), {
+      target: { value: "19011022k" }
+    });
     fireEvent.change(getByTestId("input-correo"), {
       target: { value: "arturo@duoc.cl" }
     });
     fireEvent.change(getByTestId("input-password"), {
       target: { value: "secreto123" }
     });
+    fireEvent.change(getByTestId("select-region"), {
+      target: { value: "Valparaíso" }
+    });
+    fireEvent.change(getByTestId("select-comuna"), {
+      target: { value: "Quilpué" }
+    });
 
     fireEvent.click(getByTestId("btn-submit-registro"));
 
     expect(registroSpy).toHaveBeenCalledWith({
+      run: "19011022K",
       nombre: "Arturo Cabello",
-      correo: "arturo@duoc.cl"
+      correo: "arturo@duoc.cl",
+      password: "secreto123",
+      region: "Valparaíso",
+      comuna: "Quilpué",
+      rol: "cliente"
     });
     expect(getByTestId("form-success").textContent).toContain(
       "¡Usuario registrado exitosamente!"
@@ -175,7 +195,8 @@ describe("Suite de Pruebas Unitarias - Tienda67 (10 Pruebas)", () => {
   });
 
   it("10. Debe validar la creación de un producto nuevo y simular el guardado en localStorage mediante spyOn", () => {
-    spyOn(window.localStorage, "setItem");
+    // Se espía el prototipo: algunos navegadores no permiten sobrescribir métodos de la instancia de Storage.
+    spyOn(Storage.prototype, "setItem");
 
     const nuevoProd = {
       nombre: "Sábanas King",
@@ -186,7 +207,7 @@ describe("Suite de Pruebas Unitarias - Tienda67 (10 Pruebas)", () => {
 
     expect(resultado.esValido).toBeTrue();
     window.localStorage.setItem("nuevo_producto", JSON.stringify(nuevoProd));
-    expect(window.localStorage.setItem).toHaveBeenCalledWith(
+    expect(Storage.prototype.setItem).toHaveBeenCalledWith(
       "nuevo_producto",
       JSON.stringify(nuevoProd)
     );

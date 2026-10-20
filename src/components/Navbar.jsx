@@ -1,7 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-export default function Navbar({ totalItems }) {
+export default function Navbar({ totalItems, sesion = null, onCerrarSesion }) {
+  const puedeAdministrar =
+    sesion && (sesion.rol === "administrador" || sesion.rol === "vendedor");
+
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
       <div className="container">
@@ -40,14 +43,45 @@ export default function Navbar({ totalItems }) {
               <Link className="nav-link" to="/nosotros">Nosotros</Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/registro">Registro</Link>
+              <Link className="nav-link" to="/blogs">Blogs</Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link text-warning" to="/admin">Admin</Link>
+              <Link className="nav-link" to="/contacto">Contacto</Link>
             </li>
+            {puedeAdministrar && (
+              <li className="nav-item">
+                <Link className="nav-link text-warning" to="/admin" data-testid="nav-panel">
+                  {sesion.rol === "administrador" ? "⚙️ Panel Admin" : "📋 Panel Vendedor"}
+                </Link>
+              </li>
+            )}
           </ul>
 
-          <div className="d-flex">
+          <div className="d-flex flex-column flex-lg-row align-items-lg-center gap-2">
+            {sesion ? (
+              <>
+                <span className="text-info fw-semibold" data-testid="nav-saludo">
+                  👤 Hola, {sesion.nombre}
+                </span>
+                <button
+                  type="button"
+                  className="btn btn-outline-danger btn-sm"
+                  data-testid="btn-logout"
+                  onClick={onCerrarSesion}
+                >
+                  Cerrar sesión
+                </button>
+              </>
+            ) : (
+              <>
+                <Link className="btn btn-outline-light btn-sm" to="/login" data-testid="nav-login">
+                  Iniciar sesión
+                </Link>
+                <Link className="btn btn-light btn-sm" to="/registro" data-testid="nav-registro">
+                  Registrarse
+                </Link>
+              </>
+            )}
             <Link to="/carrito" className="btn btn-outline-light position-relative">
               🛒 Carrito
               <span

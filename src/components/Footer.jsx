@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-export default function Footer({ nombreTienda = "Tienda67", anio = 2026 }) {
+export default function Footer({ nombreTienda = "Tienda67", anio = 2026, puedeAdministrar = false }) {
   return (
     <footer className="bg-dark text-light mt-auto pt-4 pb-3 border-top border-secondary">
       <div className="container">
@@ -35,6 +35,9 @@ export default function Footer({ nombreTienda = "Tienda67", anio = 2026 }) {
                 <Link to="/nosotros" className="text-secondary text-decoration-none">Sobre Nosotros</Link>
               </li>
               <li className="mb-1">
+                <Link to="/blogs" className="text-secondary text-decoration-none">Blogs</Link>
+              </li>
+              <li className="mb-1">
                 <Link to="/registro" className="text-secondary text-decoration-none">Registro de Usuario</Link>
               </li>
             </ul>
@@ -44,9 +47,14 @@ export default function Footer({ nombreTienda = "Tienda67", anio = 2026 }) {
             <h6 className="fw-bold text-uppercase mb-2">Contacto y Gestión</h6>
             <p className="text-secondary small mb-1">📍 Santiago, Chile</p>
             <p className="text-secondary small mb-2">✉️ contacto@tienda67.cl</p>
-            <Link to="/admin" className="btn btn-outline-warning btn-sm">
-              Panel Administrador
+            <Link to="/contacto" className="btn btn-outline-light btn-sm me-2">
+              Contáctanos
             </Link>
+            {puedeAdministrar && (
+              <Link to="/admin" className="btn btn-outline-warning btn-sm">
+                Panel Administrador
+              </Link>
+            )}
           </div>
         </div>
 

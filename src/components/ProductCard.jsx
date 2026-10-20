@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 export default function ProductCard({ producto, onAgregar }) {
   return (
@@ -23,6 +24,13 @@ export default function ProductCard({ producto, onAgregar }) {
           <p className="fw-bold fs-5 text-primary mb-3" data-testid="product-price">
             ${producto.precio.toLocaleString("es-CL")}
           </p>
+          <Link
+            to={`/productos/${producto.id}`}
+            className="btn btn-outline-secondary w-100 mb-2"
+            data-testid={`btn-detalle-${producto.id}`}
+          >
+            Ver detalle
+          </Link>
           <button
             className="btn btn-primary w-100 mt-auto"
             data-testid={`btn-add-${producto.id}`}

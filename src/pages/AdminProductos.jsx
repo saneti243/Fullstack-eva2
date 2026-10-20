@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import { validarProductoNuevo } from "../utils/validaciones";
+import AdminNav from "../components/AdminNav";
 
 export default function AdminProductos({
   productos = [],
   onAgregarProducto,
-  onEliminarProducto
+  onEliminarProducto,
+  onEditarProducto,
+  rol = "administrador"
 }) {
   const [nombre, setNombre] = useState("");
   const [categoria, setCategoria] = useState("Tecnología");
@@ -14,6 +17,38 @@ export default function AdminProductos({
   const [descripcion, setDescripcion] = useState("");
   const [errores, setErrores] = useState({});
   const [mensajeExito, setMensajeExito] = useState("");
+  const [idEdicion, setIdEdicion] = useState(null);
+
+  const limpiarFormulario = () => {
+    setIdEdicion(null);
+    setNombre("");
+    setCategoria("Tecnología");
+    setPrecio("");
+    setStock(10);
+    setImagen("/images/audifonos.jpg");
+    setDescripcion("");
+    setErrores({});
+  };
+
+  const handleEditar = (p) => {
+    setIdEdicion(p.id);
+    setNombre(p.nombre);
+    setCategoria(p.categoria);
+    setPrecio(String(p.precio));
+    setStock(p.stock ?? 1);
+    setImagen(p.imagen || "");
+    setDescripcion(p.descripcion || "");
+    setErrores({});
+    setMensajeExito("");
+  };
+
+  const handleEliminar = (p) => {
+    if (!onEliminarProducto) return;
+    if (window.confirm("¿Estás seguro de eliminar este producto?")) {
+      onEliminarProducto(p.id);
+      if (idEdicion === p.id) limpiarFormulario();
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -27,6 +62,22 @@ export default function AdminProductos({
 
     if (!validacion.esValido) {
       setErrores(validacion.errores);
+      return;
+    }
+
+    if (idEdicion !== null) {
+      const productoEditado = {
+        id: idEdicion,
+        nombre: nombre.trim(),
+        categoria,
+        precio: Number(precio),
+        stock: Number(stock) || 1,
+        imagen: imagen.trim() || "/images/tienda67.jpg",
+        descripcion: descripcion.trim() || "Producto disponible en Tienda67."
+      };
+      if (onEditarProducto) onEditarProducto(productoEditado);
+      limpiarFormulario();
+      setMensajeExito("Producto modificado correctamente.");
       return;
     }
 
@@ -53,13 +104,16 @@ export default function AdminProductos({
 
   return (
     <div className="container py-4">
-      <h2 className="mb-4 fw-bold">Panel de Administración - Gestión de Productos</h2>
+      <h2 className="mb-3 fw-bold">Panel de Administración - Gestión de Productos</h2>
+      <AdminNav rol={rol} />
 
       <div className="row g-4">
         {}
         <div className="col-12 col-lg-5">
           <div className="card shadow-sm p-4">
-            <h4 className="mb-3">Agregar Nuevo Producto</h4>
+            <h4 className="mb-3" data-testid="admin-form-titulo">
+              {idEdicion !== null ? "Modificar Producto" : "Agregar Nuevo Producto"}
+            </h4>
 
             {mensajeExito && (
               <div className="alert alert-success py-2" data-testid="admin-success">
@@ -73,6 +127,7 @@ export default function AdminProductos({
                 <input
                   type="text"
                   className="form-control"
+                  data-testid="admin-nombre"
                   value={nombre}
                   onChange={(e) => setNombre(e.target.value)}
                   placeholder="Ej: Audífonos Gamer"
@@ -88,6 +143,7 @@ export default function AdminProductos({
                   <input
                     type="number"
                     className="form-control"
+                    data-testid="admin-precio"
                     value={precio}
                     onChange={(e) => setPrecio(e.target.value)}
                     placeholder="19990"
@@ -129,7 +185,7 @@ export default function AdminProductos({
               <div className="mb-3">
                 <label className="form-label">Imagen disponible</label>
                 <select
-                  className="form-select"
+                  className="form-select mb-2"
                   value={imagen}
                   onChange={(e) => setImagen(e.target.value)}
                 >
@@ -140,6 +196,14 @@ export default function AdminProductos({
                   <option value="/images/requiem.jpg">Requiem (requiem.jpg)</option>
                   <option value="/images/sabanas.jpg">Sábanas (sabanas.jpg)</option>
                 </select>
+                <input
+                  type="text"
+                  className="form-control"
+                  data-testid="admin-imagen"
+                  value={imagen}
+                  onChange={(e) => setImagen(e.target.value)}
+                  placeholder="O escribe una URL / ruta: https://... o /images/foto.jpg"
+                />
               </div>
 
               <div className="mb-3">
@@ -153,9 +217,19 @@ export default function AdminProductos({
                 />
               </div>
 
-              <button type="submit" className="btn btn-primary w-100">
-                Guardar Producto
+              <button type="submit" className="btn btn-primary w-100" data-testid="admin-guardar">
+                {idEdicion !== null ? "Guardar Cambios" : "Guardar Producto"}
               </button>
+              {idEdicion !== null && (
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary w-100 mt-2"
+                  data-testid="admin-cancelar-edicion"
+                  onClick={limpiarFormulario}
+                >
+                  Cancelar edición
+                </button>
+              )}
             </form>
           </div>
         </div>
@@ -172,7 +246,8 @@ export default function AdminProductos({
                     <th>Nombre</th>
                     <th>Categoría</th>
                     <th>Precio</th>
-                    <th>Acción</th>
+                    <th>Stock</th>
+                    <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -193,10 +268,19 @@ export default function AdminProductos({
                         <span className="badge bg-secondary">{p.categoria}</span>
                       </td>
                       <td>${p.precio.toLocaleString("es-CL")}</td>
-                      <td>
+                      <td>{p.stock ?? "-"}</td>
+                      <td className="text-nowrap">
+                        <button
+                          className="btn btn-outline-primary btn-sm me-1"
+                          data-testid={`btn-editar-${p.id}`}
+                          onClick={() => handleEditar(p)}
+                        >
+                          Editar
+                        </button>
                         <button
                           className="btn btn-outline-danger btn-sm"
-                          onClick={() => onEliminarProducto && onEliminarProducto(p.id)}
+                          data-testid={`btn-eliminar-${p.id}`}
+                          onClick={() => handleEliminar(p)}
                         >
                           Eliminar
                         </button>
